@@ -33,7 +33,7 @@ export function buildHanjaCards() {
       parsePairs(cell).forEach(({ eum, hanja }) => {
         if (!seen.has(hanja)) {
           seen.add(hanja);
-          cards.push({ id: 'h-' + hanja, type: 'hanja', hanja, eum, cat: CATS[ri], ohaeng: OHAENG[ci] });
+          cards.push({ id: 'h-' + hanja, type: 'hanja', hanja, eum, cat: CATS[ri], ohaeng: OHAENG[ci], rowIdx: ri, colIdx: ci });
         }
       });
     });

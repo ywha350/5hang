@@ -1,5 +1,5 @@
 import './style.css';
-import { buildHanjaCards, buildRowCards, OHAENG } from './data.js';
+import { buildHanjaCards, buildRowCards, OHAENG, RAW } from './data.js';
 import { saveRating, loadRatingsForMode, deleteRatingsForMode, clearAllRatings } from './db.js';
 
 const HANJA_CARDS = buildHanjaCards();
@@ -126,9 +126,16 @@ function renderBack() {
   const el = document.getElementById('card');
 
   if (c.type === 'hanja') {
+    const row = RAW[c.rowIdx];
+    const rowHTML = row.map((item, i) => `
+      <div class="row-item ${i === c.colIdx ? 'hl' : ''}">
+        <span class="row-ohaeng">${OHAENG[i]}</span>
+        <span class="row-val">${item}</span>
+      </div>`).join('');
     el.innerHTML = `
       <div class="card-big" style="font-size:52px;letter-spacing:-1.2px">${c.eum}</div>
-      <div class="card-hint">${c.cat} · ${c.ohaeng}</div>`;
+      <span class="card-cat" style="margin-top:4px">${c.cat}</span>
+      <div class="row-grid" style="margin-top:8px">${rowHTML}</div>`;
   } else {
     const rows = c.items.map((item, i) => `
       <div class="row-item ${i === 0 ? 'hl' : ''}">
