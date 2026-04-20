@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오행배속 암기</title>
+  <script type="module" crossorigin src="/5hang/assets/index-DlNhHG70.js"></script>
+  <link rel="stylesheet" crossorigin href="/5hang/assets/index-DH7Gx3xZ.css">
+</head>
+<body>
+  <header>
+    <span class="logo">오행배속 암기</span>
+  </header>
+  <main>
+
+    <!-- HOME -->
+    <div id="s-home">
+      <h1 class="home-title">학습 모드를 선택하세요</h1>
+      <div class="mode-list">
+
+        <div class="mode-card">
+          <div class="mc-top" onclick="startMode('hanja', null)">
+            <div>
+              <h3>한자 읽기</h3>
+              <p>한자를 보고 음을 떠올립니다</p>
+            </div>
+            <span class="pill-blue" id="cnt-hanja"></span>
+          </div>
+          <div class="mc-filters" id="filters-hanja"></div>
+        </div>
+
+        <div class="mode-card">
+          <div class="mc-top" onclick="startMode('row', null)">
+            <div>
+              <h3>행 암기</h3>
+              <p>목(木) 항목을 보고 나머지 4개를 떠올립니다</p>
+            </div>
+            <span class="pill-blue" id="cnt-row"></span>
+          </div>
+          <div class="mc-filters" id="filters-row"></div>
+        </div>
+
+      </div>
+      <div class="home-footer">
+        <button class="ghost-btn" onclick="resetAll()">모든 기록 초기화</button>
+      </div>
+    </div>
+
+    <!-- STUDY -->
+    <div id="s-study" class="hidden">
+      <div class="study-nav">
+        <button class="back-btn" onclick="goHome()">← 홈</button>
+        <span class="mode-label" id="mode-label"></span>
+        <span class="counter" id="counter"></span>
+      </div>
+      <div class="badges" id="badges"></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+
+      <div class="card-wrap" id="cw">
+        <div class="card" id="card"></div>
+      </div>
+
+      <div class="rating-area hidden" id="rating">
+        <div class="rating-lbl">얼마나 잘 기억했나요?</div>
+        <div class="rating-btns">
+          <button class="rbtn rb-fail"    onclick="rate('fail')">실패</button>
+          <button class="rbtn rb-medium"  onclick="rate('medium')">중간</button>
+          <button class="rbtn rb-perfect" onclick="rate('perfect')">완벽</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETE -->
+    <div id="s-complete" class="hidden">
+      <h2 class="comp-title">학습 완료!</h2>
+      <p class="comp-sub" id="comp-sub"></p>
+      <div class="stats-row">
+        <div class="stat-card sc-perfect"><div class="stat-n" id="sn-p">0</div><div class="stat-l">완벽</div></div>
+        <div class="stat-card sc-medium"> <div class="stat-n" id="sn-m">0</div><div class="stat-l">중간</div></div>
+        <div class="stat-card sc-fail">   <div class="stat-n" id="sn-f">0</div><div class="stat-l">실패</div></div>
+      </div>
+      <div class="action-col">
+        <button class="btn-p" onclick="restartAll()">이 세트 다시</button>
+        <button class="btn-s" id="btn-mf" onclick="retryMF()">중간 + 실패만 다시</button>
+        <button class="btn-s" id="btn-f"  onclick="retryF()">실패만 다시</button>
+        <button class="btn-s" onclick="goHome()">홈으로</button>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>
