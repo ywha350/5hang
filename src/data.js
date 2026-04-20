@@ -42,5 +42,5 @@ export function buildHanjaCards() {
 }
 
 export function buildRowCards() {
-  return RAW.map((row, ri) => ({ id: 'r-' + ri, type: 'row', cat: CATS[ri], items: row }));
+  return RAW.map((row, ri) => ({ id: 'r-' + CATS[ri], type: 'row', cat: CATS[ri], items: row }));
 }
