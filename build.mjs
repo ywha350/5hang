@@ -1,4 +1,82 @@
-<!DOCTYPE html>
+import * as esbuild from './node_modules/esbuild/lib/main.js';
+import { createHash } from 'crypto';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, existsSync } from 'fs';
+import { readdir } from 'fs/promises';
+
+// Clean docs/assets
+if (existsSync('docs/assets')) {
+  const old = await readdir('docs/assets');
+  old.forEach(f => rmSync(`docs/assets/${f}`));
+} else {
+  mkdirSync('docs/assets', { recursive: true });
+}
+
+// Bundle JS (CSS imported separately, not via JS)
+const jsResult = await esbuild.build({
+  entryPoints: ['src/main.js'],
+  bundle: true, minify: true, format: 'iife',
+  write: false,
+  loader: { '.css': 'empty' }, // skip CSS import in JS bundle
+});
+const jsText = new TextDecoder().decode(jsResult.outputFiles[0].contents);
+const jsHash = createHash('sha256').update(jsText).digest('hex').slice(0, 8);
+const jsFile = `index-${jsHash}.js`;
+writeFileSync(`docs/assets/${jsFile}`, jsText);
+
+// Bundle CSS separately
+const cssResult = await esbuild.build({
+  entryPoints: ['src/style.css'],
+  bundle: true, minify: true,
+  write: false,
+});
+const cssText = new TextDecoder().decode(cssResult.outputFiles[0].contents);
+const cssHash = createHash('sha256').update(cssText).digest('hex').slice(0, 8);
+const cssFile = `index-${cssHash}.css`;
+writeFileSync(`docs/assets/${cssFile}`, cssText);
+
+// SW version stamp
+const swVersion = Date.now();
+
+// Service worker
+const sw = `const CACHE='ohaeng-${swVersion}';
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  const url=new URL(e.request.url);
+  if(url.pathname.includes('/assets/')){
+    e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{caches.open(CACHE).then(ch=>ch.put(e.request,r.clone()));return r;})));
+  } else {
+    e.respondWith(fetch(e.request).then(r=>{caches.open(CACHE).then(ch=>ch.put(e.request,r.clone()));return r;}).catch(()=>caches.match(e.request)));
+  }
+});`;
+writeFileSync('docs/sw.js', sw);
+
+// Manifest
+const manifest = {
+  name: '오행배속 암기',
+  short_name: '오행배속',
+  description: '오행배속표 플래시카드',
+  theme_color: '#ffffff',
+  background_color: '#f6f5f4',
+  display: 'standalone',
+  start_url: '/5hang/',
+  scope: '/5hang/',
+  icons: [
+    { src: '/5hang/icon-192.png', sizes: '192x192', type: 'image/png' },
+    { src: '/5hang/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+  ],
+};
+writeFileSync('docs/manifest.json', JSON.stringify(manifest, null, 2));
+
+// Copy icons
+if (existsSync('public/icon-192.png')) copyFileSync('public/icon-192.png', 'docs/icon-192.png');
+if (existsSync('public/icon-512.png')) copyFileSync('public/icon-512.png', 'docs/icon-512.png');
+
+// index.html
+const html = `<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -6,10 +84,8 @@
   <title>오행배속 암기</title>
   <link rel="manifest" href="/5hang/manifest.json">
   <meta name="theme-color" content="#ffffff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="apple-touch-icon" href="/5hang/icon-192.png">
-  <script type="module" crossorigin src="/5hang/assets/index-DlNhHG70.js"></script>
-  <link rel="stylesheet" crossorigin href="/5hang/assets/index-DH7Gx3xZ.css">
+  <link rel="stylesheet" href="/5hang/assets/${cssFile}">
 </head>
 <body>
   <header>
@@ -92,10 +168,14 @@
     </div>
 
   </main>
+  <script src="/5hang/assets/${jsFile}"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/5hang/sw.js', { scope: '/5hang/' });
     }
   </script>
 </body>
-</html>
+</html>`;
+writeFileSync('docs/index.html', html);
+
+console.log(`Built: ${jsFile}, ${cssFile}, sw.js (v${swVersion})`);

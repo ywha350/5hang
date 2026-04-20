@@ -1,0 +1,23 @@
+{
+  "name": "오행배속 암기",
+  "short_name": "오행배속",
+  "description": "오행배속표 플래시카드",
+  "theme_color": "#ffffff",
+  "background_color": "#f6f5f4",
+  "display": "standalone",
+  "start_url": "/5hang/",
+  "scope": "/5hang/",
+  "icons": [
+    {
+      "src": "/5hang/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/5hang/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
